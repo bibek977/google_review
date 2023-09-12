@@ -105,6 +105,9 @@ def reviewNewest():
 
     time.sleep(5)
 
+    html = Driver.driver.find_element(By.TAG_NAME, 'html')
+    html.send_keys(Keys.END)
+    time.sleep(5)
     # newest_review = Driver.driver.find_elements(By.XPATH,"//div[@aria-label and @data-review-id]")
 
     newest_review_image = Driver.driver.find_elements(By.XPATH,"//div[@aria-label and @data-review-id]/div/div/div/button/img")

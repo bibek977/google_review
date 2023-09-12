@@ -7,6 +7,8 @@ from selenium.webdriver.support import expected_conditions as Ec
 from selenium.webdriver.chrome.service import Service as ChromeService
 from webdriver_manager.chrome import ChromeDriverManager
 
+from selenium.common.exceptions import NoSuchElementException
+
 from selenium.webdriver.chrome.options import Options
 from tags import *
 import time
@@ -29,7 +31,7 @@ class Driver:
     def getImages():
 
         try:
-            time.sleep(5)
+            time.sleep(10)
             Title = Driver.driver.title
 
             photos = Driver.driver.find_element(By.XPATH,'//div[contains(text(),"photos")]/parent::button')
@@ -41,15 +43,15 @@ class Driver:
             images = Driver.driver.find_elements(By.XPATH,'//a[@data-photo-index]/div[@role]')
             for i in images:
                 image = i.get_attribute("style")
-                print(image)
-                image_list.append(image)
+                img = image.split('url("')[1]
+                new_img = img.split('")')[0]
+                if new_img == "//:0":
+                    new_img = "Not avialible"
+                image_list.append(new_img)
 
             Driver.driver.back()
 
-            # return {
-            #     "Title" : Title,
-            #     "Images" : image_list
-            # }
+            image_list = [i for i in image_list if i != "Not avialible"]
             return Title, image_list
 
         except Exception as e:
@@ -60,11 +62,6 @@ class Driver:
         try:
             time.sleep(5)
             name = Driver.driver.find_element(By.XPATH,"//h1/span/parent::h1").text
-            print(name)
-
-            # return {
-            #     'name' : name
-            # }
 
             return name
 
@@ -76,10 +73,8 @@ class Driver:
         try:
             time.sleep(5)
             stars = Driver.driver.find_element(By.XPATH,'//span[contains(@aria-label,"stars") and @role="img"][1]').get_attribute('aria-label')
-            print(stars)
 
             total = Driver.driver.find_element(By.XPATH,'//span[contains(@aria-label,"reviews")]').get_attribute('aria-label')
-            print(total)
 
             return stars,total
         
@@ -95,7 +90,6 @@ class Driver:
             info_list = []
             for i in data:
                 info = i.text
-                print(info)
                 info_list.append(info)
 
             return info_list
@@ -111,55 +105,65 @@ class Driver:
             button.click()
             time.sleep(10)
 
-            sort = Driver.driver.find_element(By.XPATH,'//span[contains(text(),"Sort")]//ancestor::button')
-            sort.click()
-            time.sleep(5)
 
-            relevant = Driver.driver.find_element(By.XPATH,'//div[@role="menu"]/div[@data-index][2]')
-            relevant.click()
-            time.sleep(5)
+            all_review = {}
+            review_type = ["Relevant","Newest","Highest","Lowest"]
+            for n in range(4):
 
-            reviews = Driver.driver.find_elements(By.XPATH,'//div[@aria-label and @data-review-id]')
 
-            r_image = []
-            r_name = []
-            r_stars = []
-            r_date = []
+                sort = Driver.driver.find_element(By.XPATH,'//span[contains(text(),"Sort")]//ancestor::button')
+                sort.click()
+                time.sleep(5)
+                
+                time.sleep(5)
+                relevant = Driver.driver.find_element(By.XPATH,f'//div[@role="menu"]/div[@data-index][{n+1}]')
+                relevant.click()
+                time.sleep(5)
 
-            review = {}
-            for i in reviews:
+                reviews = Driver.driver.find_elements(By.XPATH,'//div[@aria-label and @data-review-id]')
 
-                image = i.find_element(By.XPATH,'div/div/div/button/img').get_attribute('src')
-                name = i.find_element(By.XPATH,'div/div/div[2]/div[2]/div/button/div[1]').text
-                # desc = i.find_element(By.XPATH,'div/div/div[4]/div[2]/div/span[1]').text
-                stars = i.find_element(By.XPATH,'div/div/div[4]/div[1]/span[1]').get_attribute('aria-label')
-                date = i.find_element(By.XPATH,'div/div/div[4]/div[1]/span[2]').text
-                print(f'{name} : {image} \n {stars} : {date} \n \n ')
+                r_image = []
+                r_name = []
+                r_stars = []
+                r_desc = []
+                r_date = []
 
-                r_image.append(image)
-                r_name.append(name)
-                r_stars.append(stars)
-                r_date.append(date)
+                review = {}
+                for i in reviews:
 
-                review[name] = [image,stars,date]
+                    image = i.find_element(By.XPATH,'div/div/div/button/img').get_attribute('src')
+                    name = i.find_element(By.XPATH,'div/div/div[2]/div[2]/div/button/div[1]').text
 
-            # return r_date,r_name,r_image,r_stars
-            return review
+                    try:
+                        desc = i.find_element(By.XPATH,'div/div/div[4]/div[2]/div/span[1]').text
+                    except NoSuchElementException:
+                        desc = "Not rated"
+
+                    stars = i.find_element(By.XPATH,'div/div/div[4]/div[1]/span[1]').get_attribute('aria-label')
+                    date = i.find_element(By.XPATH,'div/div/div[4]/div[1]/span[2]').text
+
+                    r_image.append(image)
+                    r_name.append(name)
+                    r_stars.append(stars)
+                    r_date.append(date)
+                    r_desc.append(desc)
+
+                    # review[name] = [image,stars,date,desc]
+                    review[name] = {"Image" :  image, "Rate" : stars, "Time" : date, "Body" :  desc}
+        
+                all_review[review_type[n]] = review
+                
+            return all_review
 
         except Exception as e:
             print(e)
+
 
     def quit():
         
         time.sleep(5)
         Driver.driver.quit()
 
-# Driver.getImages()
-# Driver.getName()
-# Driver.getRating()
-# Driver.getOfficeData()
-# Driver.getReviews()
-# Driver.quit()
 
 data = {
 
