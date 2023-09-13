@@ -78,9 +78,17 @@ class Driver:
         except Exception as e:
             print(e)
 
-Driver.getTitle()
-Driver.getName()
-Driver.getRating()
-Driver.getOfficeData()
+office_data = {
+
+}
+    
+office_data["Title"] = Driver.getTitle()
+office_data["Name"] = Driver.getName()
+office_data["Rating"] = Driver.getRating()
+office_data["Data"] = Driver.getOfficeData()
+
+with open("office.json",'w') as f:
+    json.dump(office_data,f)
+
 
 Driver.driver.quit()

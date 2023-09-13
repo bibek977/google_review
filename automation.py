@@ -361,15 +361,25 @@ class Driver:
 data = {
 
 }
-data["Title"] = info.getTitle()
-data["Name"] = info.getName()
-data["Rating"] = info.getRating()
-data["OfficeInfo"] = info.getOfficeData()
+print("********* Program Started *************")
 data["Images"] = Driver.getImages()
-data["Relevant Review List"] = Driver.reviewNewest()
+print("********* Image Data Scraped *************")
+data["Title"] = Driver.getTitle()
+print("********* Title Scraped *************")
+data["Name"] = Driver.getName()
+print("********* Name Scraped *************")
+data["Rating"] = Driver.getRating()
+print("********* Rating Scraped *************")
+data["OfficeInfo"] = Driver.getOfficeData()
+print("********* Office Data Scraped *************")
+data["Relevant Review List"] = Driver.reviewRelevant()
+print("********* Relevant Review Scraped *************")
 data["Newest Review List"] = Driver.reviewNewest()
+print("********* Newest Review Scraped *************")
 data["Highest Review List"] = Driver.reviewHighest()
+print("********* Highest Review Scraped *************")
 data["Lowest Review List"] = Driver.reviewLowest()
+print("********* Lowest Review Scraped *************")
 
 with open("review.json",'w') as f:
     json.dump(data,f)
